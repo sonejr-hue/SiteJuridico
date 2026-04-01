@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>JurisTech — Portal Jurídico</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0f172a;--sidebar:#1e293b;--card:#1e293b;--card2:#273449;
+  --accent:#3b82f6;--accent2:#60a5fa;--accent3:#1d4ed8;
+  --green:#22c55e;--red:#ef4444;--yellow:#f59e0b;--blue:#06b6d4;
+  --text:#f1f5f9;--muted:#94a3b8;--border:#334155;
+  --sidebar-w:240px;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Segoe UI',Arial,sans-serif;font-size:14px;}
+a{color:var(--accent2);text-decoration:none;}
+button{cursor:pointer;font-family:inherit;font-size:.85rem;}
+input,select,textarea{font-family:inherit;font-size:.9rem;color:var(--text);background:var(--card2);border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;outline:none;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);}
+textarea{resize:vertical;min-height:80px;}
+label{display:block;font-size:.75rem;color:var(--muted);font-weight:700;margin-bottom:5px;}
+h1{font-size:1.4rem;font-weight:800;}
+h2{font-size:1.1rem;font-weight:800;}
+h3{font-size:.95rem;font-weight:700;}
+
+/* LAYOUT */
+#app{display:flex;height:100vh;overflow:hidden;}
+#sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;transition:transform .25s;z-index:50;}
+.sidebar-logo{padding:20px 18px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);}
+.sidebar-logo-icon{font-size:1.5rem;}
+.sidebar-logo-text{font-size:1rem;font-weight:900;color:var(--accent2);}
+.sidebar-logo-sub{font-size:.6rem;color:var(--muted);}
+.sidebar-nav{flex:1;overflow-y:auto;padding:10px 8px;}
+.nav-group{margin-bottom:16px;}
+.nav-group-label{font-size:.6rem;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;padding:0 10px;margin-bottom:6px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;color:var(--muted);font-size:.82rem;font-weight:600;transition:all .15s;border:none;background:transparent;width:100%;text-align:left;}
+.nav-item:hover{background:var(--card2);color:var(--text);}
+.nav-item.active{background:rgba(59,130,246,.18);color:var(--accent2);}
+.nav-item .nav-icon{font-size:1rem;width:20px;text-align:center;}
+.sidebar-user{padding:14px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:var(--accent3);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:900;flex-shrink:0;}
+.user-avatar.admin-avatar{background:linear-gradient(135deg,#7c3aed,#4f46e5);}
+.user-info{flex:1;min-width:0;}
+.user-name{font-size:.78rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.user-role{font-size:.62rem;color:var(--muted);}
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{height:52px;background:var(--sidebar);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;}
+.topbar-title{font-size:.95rem;font-weight:800;flex:1;}
+.topbar-actions{display:flex;gap:8px;}
+.content{flex:1;overflow-y:auto;padding:24px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+.content::-webkit-scrollbar{width:7px;}
+.content::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+.hamburger{display:none;background:none;border:none;color:var(--text);font-size:1.3rem;padding:4px 8px;}
+
+/* COMPONENTS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;border:none;font-weight:700;font-size:.82rem;transition:all .15s;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#2563eb;}
+.btn-secondary{background:var(--card2);color:var(--text);border:1px solid var(--border);}
+.btn-secondary:hover{background:#2d3f55;}
+.btn-danger{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.3);}
+.btn-danger:hover{background:rgba(239,68,68,.25);}
+.btn-success{background:rgba(34,197,94,.15);color:#86efac;border:1px solid rgba(34,197,94,.3);}
+.btn-warning{background:rgba(245,158,11,.15);color:#fde68a;border:1px solid rgba(245,158,11,.3);}
+.btn-purple{background:rgba(124,58,237,.2);color:#c4b5fd;border:1px solid rgba(124,58,237,.35);}
+.btn-sm{padding:6px 12px;font-size:.75rem;}
+.btn-xs{padding:4px 8px;font-size:.7rem;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;}
+.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:999px;font-size:.65rem;font-weight:800;}
+.badge-blue{background:rgba(59,130,246,.15);color:#93c5fd;border:1px solid rgba(59,130,246,.25);}
+.badge-green{background:rgba(34,197,94,.15);color:#86efac;border:1px solid rgba(34,197,94,.25);}
+.badge-yellow{background:rgba(245,158,11,.15);color:#fde68a;border:1px solid rgba(245,158,11,.25);}
+.badge-red{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.25);}
+.badge-purple{background:rgba(124,58,237,.15);color:#c4b5fd;border:1px solid rgba(124,58,237,.25);}
+.badge-gray{background:rgba(148,163,184,.1);color:var(--muted);border:1px solid var(--border);}
+.divider{height:1px;background:var(--border);margin:16px 0;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.form-group{margin-bottom:14px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.section-title{font-size:.88rem;font-weight:800;}
+.muted{color:var(--muted);font-size:.78rem;}
+.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:6px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);color:var(--accent2);font-size:.68rem;font-weight:700;}
+
+/* TOAST */
+#toast-container{position:fixed;top:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:8px;}
+.toast{padding:12px 18px;border-radius:10px;font-size:.82rem;font-weight:700;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,.4);animation:toastIn .3s ease;min-width:220px;}
+.toast-success{background:#166534;}
+.toast-error{background:#7f1d1d;}
+.toast-info{background:#1e3a5f;}
+.toast-warning{background:#78350f;}
+@keyframes toastIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;animation:modalIn .25s ease;}
+.modal-lg{max-width:780px;}
+.modal-xl{max-width:1000px;}
+@keyframes modalIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+.modal-close{background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;padding:4px;}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;font-size:.72rem;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:10px 12px;border-bottom:1px solid var(--border);}
+td{padding:11px 12px;border-bottom:1px solid rgba(51,65,85,.5);font-size:.82rem;vertical-align:middle;}
+tr:hover td{background:rgba(255,255,255,.02);}
+
+/* TABS */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:18px;overflow-x:auto;}
+.tab{padding:10px 18px;font-size:.82rem;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--accent2);border-bottom-color:var(--accent);}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+
+/* STAT CARDS */
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;}
+.stat-icon{font-size:1.6rem;margin-bottom:8px;}
+.stat-value{font-size:1.6rem;font-weight:900;}
+.stat-label{font-size:.72rem;color:var(--muted);margin-top:4px;}
+
+/* ADMIN ESPECIAL */
+.admin-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(79,70,229,.2));border:1px solid rgba(124,58,237,.4);border-radius:999px;font-size:.7rem;font-weight:800;color:#c4b5fd;}
+.admin-panel-header{background:linear-gradient(135deg,rgba(124,58,237,.12),rgba(79,70,229,.08));border:1px solid rgba(124,58,237,.25);border-radius:14px;padding:18px;margin-bottom:20px;display:flex;align-items:center;gap:14px;}
+.admin-panel-icon{font-size:2rem;}
+.perm-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(51,65,85,.4);}
+.perm-label{font-size:.82rem;font-weight:600;}
+.perm-sub{font-size:.7rem;color:var(--muted);}
+.toggle{position:relative;width:40px;height:22px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:var(--border);border-radius:999px;transition:.3s;cursor:pointer;}
+.toggle-slider:before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s;}
+.toggle input:checked+.toggle-slider{background:var(--accent);}
+.toggle input:checked+.toggle-slider:before{transform:translateX(18px);}
+.user-card-admin{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+.user-card-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:900;flex-shrink:0;}
+.check-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(51,65,85,.4);}
+.check-icon{font-size:1rem;flex-shrink:0;margin-top:1px;}
+.check-text{font-size:.8rem;line-height:1.4;}
+.check-label{font-weight:700;display:block;margin-bottom:2px;}
+.warn-item{display:flex;align-items:flex-start;gap:8px;padding:8px 12px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:8px;margin-bottom:6px;}
+.warn-text{font-size:.78rem;color:#fde68a;line-height:1.4;}
+.ementa-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;font-family:'Times New Roman',serif;font-size:.82rem;line-height:1.7;white-space:pre-wrap;}
+.result-card{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;transition:border-color .15s;}
+.result-card:hover{border-color:var(--accent);}
+.result-title{font-size:.88rem;font-weight:800;margin-bottom:6px;}
+.result-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+.result-content{font-size:.78rem;color:var(--muted);line-height:1.5;margin-bottom:10px;}
+.result-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.search-filters{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px;}
+.snippet-card{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px;}
+.editor-layout{display:grid;grid-template-columns:220px 1fr 260px;gap:0;height:calc(100vh - 52px);overflow:hidden;}
+.editor-structure{background:var(--sidebar);border-right:1px solid var(--border);overflow-y:auto;padding:14px 10px;}
+.editor-main{display:flex;flex-direction:column;overflow:hidden;}
+.editor-toolbar{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;background:var(--sidebar);}
+.editor-body{flex:1;overflow-y:auto;padding:14px;}
+.editor-sidebar{background:var(--sidebar);border-left:1px solid var(--border);overflow-y:auto;padding:14px 10px;}
+.struct-item{padding:8px 10px;border-radius:8px;cursor:pointer;font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:8px;margin-bottom:2px;}
+.struct-item:hover{background:var(--card2);color:var(--text);}
+.struct-item.active{background:rgba(59,130,246,.15);color:var(--accent2);}
+.editor-textarea{width:100%;height:100%;background:var(--bg);border:none;color:var(--text);font-family:'Times New Roman',serif;font-size:13px;line-height:1.8;padding:20px;resize:none;outline:none;}
+.steps{display:flex;gap:0;margin-bottom:24px;overflow-x:auto;}
+.step{display:flex;align-items:center;gap:8px;padding:8px 14px;font-size:.75rem;font-weight:700;color:var(--muted);border-bottom:2px solid var(--border);flex-shrink:0;}
+.step.active{color:var(--accent2);border-bottom-color:var(--accent);}
+.step.done{color:var(--green);border-bottom-color:var(--green);}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:.7rem;}
+.step.active .step-num{background:var(--accent);}
+.step.done .step-num{background:var(--green);}
+
+/* LOGIN */
+#login-screen{display:flex;align-items:center;justify-content:center;height:100vh;background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.login-logo{text-align:center;margin-bottom:24px;}
+.login-logo-icon{font-size:2.5rem;}
+.login-logo-name{font-size:1.4rem;font-weight:900;color:var(--accent2);margin-top:6px;}
+.login-logo-sub{font-size:.75rem;color:var(--muted);margin-top:4px;}
+.login-error{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:10px 12px;font-size:.78rem;color:#fca5a5;margin-bottom:12px;display:none;}
+.lgpd-note{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:8px;padding:10px 12px;font-size:.72rem;color:var(--muted);line-height:1.5;margin-top:14px;}
+.login-demo-hint{background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:8px;padding:10px 12px;font-size:.72rem;color:#c4b5fd;line-height:1.6;margin-top:10px;}
+
+@media(max-width:900px){
+  #sidebar{position:fixed;top:0;left:0;height:100%;transform:translateX(-100%);}
+  #sidebar.open{transform:translateX(0);}
+  .hamburger{display:block;}
+  .editor-layout{grid-template-columns:1fr;}
+  .editor-structure,.editor-sidebar{display:none;}
+  .grid-4{grid-template-columns:1fr 1fr;}
+  .grid-3{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:600px){
+  .grid-2,.grid-3,.grid-4,.form-row,.form-row-3{grid-template-columns:1fr;}
+  .content{padding:14px;}
+}
+</style>
+</head>
+<body>
+<div id="toast-container"></div>
+
+<!-- ===== LOGIN ===== -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-icon">⚖️</div>
+      <div class="login-logo-name">JurisTech</div>
+      <div class="login-logo-sub">Portal Jurídico — Civil · Penal · Proc. Civil · Proc. Penal</div>
+    </div>
+    <div class="login-error" id="login-error">E-mail ou senha incorretos.</div>
+    <div class="form-group">
+      <label for="login-email">E-mail</label>
+      <input id="login-email" type="email" placeholder="seu@escritorio.com.br" autocomplete="username"
+             onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <div class="form-group">
+      <label for="login-pass">Senha</label>
+      <input id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password"
+             onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;font-size:.95rem;margin-top:4px" onclick="doLogin()">
+      Entrar
+    </button>
+    <div class="login-demo-hint">
+      🔑 <strong>Credenciais de demonstração:</strong><br/>
+      <strong>Admin:</strong> admin@juristech.com.br / <strong>121212</strong><br/>
+      <strong>Procurador:</strong> procurador@escritorio.com.br / <strong>123456</strong><br/>
+      <strong>Assistente:</strong> assistente@escritorio.com.br / <strong>123456</strong>
+    </div>
+    <div class="lgpd-note">
+      🔒 <strong>LGPD:</strong> Ao entrar, você concorda com o tratamento de dados para prestação de serviços jurídicos. Dados armazenados localmente nesta demonstração. Em produção, aplica-se política de retenção e minimização.
+    </div>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="app" style="display:none">
+  <nav id="sidebar" aria-label="Menu principal">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">⚖️</div>
+      <div>
+        <div class="sidebar-logo-text">JurisTech</div>
+        <div class="sidebar-logo-sub">Portal Jurídico</div>
+      </div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-group">
+        <div class="nav-group-label">Principal</div>
+        <button class="nav-item active" onclick="navigate('dashboard')" id="nav-dashboard"><span class="nav-icon">🏠</span>Dashboard</button>
+        <button class="nav-item" onclick="navigate('processos')" id="nav-processos"><span class="nav-icon">📁</span>Processos</button>
+        <button class="nav-item" onclick="navigate('documentos')" id="nav-documentos"><span class="nav-icon">📄</span>Documentos</button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Criação</div>
+        <button class="nav-item" onclick="navigate('wizard')" id="nav-wizard"><span class="nav-icon">✍️</span>Nova Petição</button>
+        <button class="nav-item" onclick="navigate('modelos')" id="nav-modelos"><span class="nav-icon">📋</span>Modelos</button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Pesquisa</div>
+        <button class="nav-item" onclick="navigate('pesquisa')" id="nav-pesquisa"><span class="nav-icon">🔎</span>Pesquisa</button>
+        <button class="nav-item" onclick="navigate('colecoes')" id="nav-colecoes"><span class="nav-icon">🗂️</span>Coleções</button>
+      </div>
+      <div class="nav-group" id="admin-nav" style="display:none">
+        <div class="nav-group-label">Administração</div>
+        <button class="nav-item" onclick="navigate('admin')" id="nav-admin"><span class="nav-icon">⚙️</span>Admin</button>
+        <button class="nav-item" onclick="navigate('auditoria')" id="nav-auditoria"><span class="nav-icon">📊</span>Auditoria</button>
+      </div>
+    </div>
+    <div class="sidebar-user">
+      <div class="user-avatar" id="user-avatar">P</div>
+      <div class="user-info">
+        <div class="user-name" id="user-name-display">Procurador</div>
+        <div class="user-role" id="user-role-display">procurador</div>
+      </div>
+      <button class="btn btn-xs btn-secondary" onclick="doLogout()" title="Sair">↩</button>
+    </div>
+  </nav>
+
+  <div id="main">
+    <div class="topbar">
+      <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-actions" id="topbar-actions">
+        <button class="btn btn-primary btn-sm" onclick="navigate('wizard')">✍️ Nova Petição</button>
+        <button class="btn btn-secondary btn-sm" onclick="navigate('pesquisa')">🔎 Pesquisar</button>
+      </div>
+    </div>
+
+    <div class="content" id="content-area">
+
+      <!-- DASHBOARD -->
+      <div id="page-dashboard" class="page">
+        <div style="margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <div>
+            <h1 id="dash-greeting">Bom dia</h1>
+            <p class="muted" style="margin-top:4px">Portal Jurídico — Civil · Proc. Civil · Penal · Proc. Penal</p>
+          </div>
+          <div id="dash-admin-badge"></div>
+        </div>
+        <div class="grid-4" style="margin-bottom:24px">
+          <div class="stat-card"><div class="stat-icon">📁</div><div class="stat-value" id="stat-processos">0</div><div class="stat-label">Processos ativos</div></div>
+          <div class="stat-card"><div class="stat-icon">📄</div><div class="stat-value" id="stat-docs">0</div><div class="stat-label">Documentos</div></div>
+          <div class="stat-card"><div class="stat-icon">🗂️</div><div class="stat-value" id="stat-snips">0</div><div class="stat-label">Recortes salvos</div></div>
+          <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-value">18</div><div class="stat-label">Modelos disponíveis</div></div>
+        </div>
+        <div class="grid-2" style="margin-bottom:24px">
+          <div>
+            <div class="section-header"><span class="section-title">⚡ Ações rápidas</span></div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <button class="btn btn-primary" onclick="navigate('wizard')" style="justify-content:flex-start">✍️ Criar nova petição (wizard)</button>
+              <button class="btn btn-secondary" onclick="navigate('pesquisa')" style="justify-content:flex-start">🔎 Pesquisar jurisprudência</button>
+              <button class="btn btn-secondary" onclick="setSearchTab('leis');navigate('pesquisa')" style="justify-content:flex-start">📖 Consultar legislação</button>
+              <button class="btn btn-secondary" onclick="navigate('processos')" style="justify-content:flex-start">📁 Ver processos</button>
+              <button class="btn btn-secondary" onclick="navigate('colecoes')" style="justify-content:flex-start">🗂️ Minhas coleções</button>
+              <div id="dash-admin-actions"></div>
+            </div>
+          </div>
+          <div>
+            <div class="section-header"><span class="section-title">📄 Documentos recentes</span></div>
+            <div id="dash-docs-list"></div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="section-header"><span class="section-title">📋 Catálogo de peças disponíveis</span></div>
+        <div class="grid-3" id="dash-catalog"></div>
+      </div>
+
+      <!-- PROCESSOS -->
+      <div id="page-processos" class="page" style="display:none">
+        <div class="section-header">
+          <h1>📁 Processos</h1>
+          <button class="btn btn-primary" onclick="openModalProcesso()">+ Novo processo</button>
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="form-row">
+            <div class="form-group" style="margin:0"><label>Buscar</label><input id="proc-search" placeholder="Cliente, nº processo, tribunal..." oninput="renderProcessos()"/></div>
+            <div class="form-group" style="margin:0"><label>Status</label>
+              <select id="proc-filter-status" onchange="renderProcessos()">
+                <option value="">Todos</option><option value="ativo">Ativo</option><option value="arquivado">Arquivado</option><option value="encerrado">Encerrado</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Nº Processo</th><th>Cliente</th><th>Tribunal</th><th>Área</th><th>Status</th><th>Tags</th><th>Ações</th></tr></thead>
+          <tbody id="proc-tbody"></tbody></table>
+        </div>
+      </div>
+
+      <!-- DOCUMENTOS -->
+      <div id="page-documentos" class="page" style="display:none">
+        <div class="section-header">
+          <h1>📄 Documentos</h1>
+          <button class="btn btn-primary" onclick="navigate('wizard')">+ Nova petição</button>
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="form-row">
+            <div class="form-group" style="margin:0"><label>Buscar</label><input id="doc-search" placeholder="Título, processo, tipo..." oninput="renderDocumentos()"/></div>
+            <div class="form-group" style="margin:0"><label>Tipo</label>
+              <select id="doc-filter-tipo" onchange="renderDocumentos()">
+                <option value="">Todos</option><option value="civil">Civil</option><option value="penal">Penal</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Título</th><th>Tipo</th><th>Processo</th><th>Status</th><th>Autor</th><th>Atualizado</th><th>Ações</th></tr></thead>
+          <tbody id="doc-tbody"></tbody></table>
+        </div>
+      </div>
+
+      <!-- WIZARD -->
+      <div id="page-wizard" class="page" style="display:none">
+        <h1 style="margin-bottom:6px">✍️ Assistente de Petição</h1>
+        <p class="muted" style="margin-bottom:20px">Preencha os campos guiados. A peça será gerada no Editor ao final.</p>
+        <div class="steps" id="wizard-steps"></div>
+        <div id="wizard-body"></div>
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <button class="btn btn-secondary" id="wizard-back" onclick="wizardBack()">← Anterior</button>
+          <button class="btn btn-primary" id="wizard-next" onclick="wizardNext()">Próximo →</button>
+          <button class="btn btn-success" id="wizard-finish" style="display:none" onclick="wizardFinish()">✅ Gerar no Editor</button>
+        </div>
+      </div>
+
+      <!-- EDITOR -->
+      <div id="page-editor" class="page" style="display:none;padding:0">
+        <div class="editor-layout">
+          <div class="editor-structure">
+            <div style="font-size:.72rem;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Estrutura</div>
+            <div id="editor-struct-list"></div>
+            <div class="divider"></div>
+            <div style="font-size:.72rem;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Checagem</div>
+            <div id="editor-warnings"></div>
+          </div>
+          <div class="editor-main">
+            <div class="editor-toolbar">
+              <button class="btn btn-secondary btn-sm" onclick="saveDraft()">💾 Rascunho</button>
+              <button class="btn btn-secondary btn-sm" onclick="saveVersion()">📌 Versão</button>
+              <button class="btn btn-primary btn-sm" onclick="exportDoc('pdf')">📄 PDF</button>
+              <button class="btn btn-primary btn-sm" onclick="exportDoc('docx')">📝 DOCX</button>
+              <button class="btn btn-secondary btn-sm" onclick="copyDoc()">📋 Copiar</button>
+              <button class="btn btn-secondary btn-sm" onclick="openVersions()">🕐 Versões</button>
+              <span class="muted" style="margin-left:auto;font-size:.7rem" id="editor-status">Rascunho</span>
+            </div>
+            <div class="editor-body">
+              <div class="form-group"><label>Título do documento</label><input id="editor-title" placeholder="Ex.: Petição Inicial — Ação de Cobrança"/></div>
+              <textarea id="editor-content" class="editor-textarea" style="height:calc(100vh - 280px)" placeholder="Conteúdo da peça...&#10;&#10;Use a estrutura à esquerda para navegar.&#10;Use os recortes à direita para inserir jurisprudência/leis (somente por seleção explícita)."></textarea>
+            </div>
+          </div>
+          <div class="editor-sidebar">
+            <div style="font-size:.72rem;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Recortes</div>
+            <p style="font-size:.7rem;color:var(--muted);margin-bottom:10px;line-height:1.4">Jurisprudência e leis só entram no documento se você clicar em <strong>Inserir</strong>.</p>
+            <div id="editor-snippets-list"></div>
+            <button class="btn btn-secondary btn-sm" style="width:100%;margin-top:8px;justify-content:center" onclick="navigate('pesquisa')">🔎 Buscar mais</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PESQUISA -->
+      <div id="page-pesquisa" class="page" style="display:none">
+        <h1 style="margin-bottom:16px">🔎 Pesquisa</h1>
+        <div class="tabs">
+          <div class="tab active" id="tab-juris" onclick="setSearchTab('juris')">⚖️ Jurisprudência</div>
+          <div class="tab" id="tab-leis" onclick="setSearchTab('leis')">📖 Legislação</div>
+          <div class="tab" id="tab-doutrina" onclick="setSearchTab('doutrina')">📚 Doutrina</div>
+        </div>
+        <div class="tab-content active" id="tc-juris">
+          <div class="search-filters">
+            <div class="form-group" style="margin-bottom:10px">
+              <label>Palavras-chave</label>
+              <div style="display:flex;gap:8px">
+                <input id="juris-q" placeholder="Ex.: imissão de posse, cumprimento de sentença..." onkeydown="if(event.key==='Enter')searchJuris()"/>
+                <button class="btn btn-primary" onclick="searchJuris()">⏎ Buscar</button>
+              </div>
+            </div>
+            <div class="form-row-3">
+              <div class="form-group" style="margin:0"><label>Tribunal</label>
+                <select id="juris-tribunal">
+                  <option value="">Todos</option>
+                  <option>STF</option><option>STJ</option><option>TST</option>
+                  <option>TRF1</option><option>TRF2</option><option>TRF3</option><option>TRF4</option><option>TRF5</option>
+                  <option>TJSP</option><option>TJRJ</option><option>TJMG</option><option>TJRS</option><option>TJPR</option>
+                  <option>TJSC</option><option>TJBA</option><option>TJPE</option><option>TJCE</option><option>TJGO</option>
+                  <option>TJDF</option><option>TJAM</option><option>TJPA</option><option>TJMS</option><option>TJMT</option>
+                  <option>TJAL</option><option>TJSE</option><option>TJPI</option><option>TJMA</option><option>TJRN</option>
+                  <option>TJPB</option><option>TJTO</option><option>TJRO</option><option>TJAC</option><option>TJRR</option><option>TJAP</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin:0"><label>Classe</label>
+                <select id="juris-classe">
+                  <option value="">Todas</option>
+                  <option>Agravo de Instrumento</option><option>Apelação</option><option>Embargos de Declaração</option>
+                  <option>Recurso Especial</option><option>Recurso Extraordinário</option><option>Habeas Corpus</option>
+                  <option>Mandado de Segurança</option><option>Ação Penal</option><option>Recurso em Sentido Estrito</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin:0"><label>Área</label>
+                <select id="juris-area">
+                  <option value="">Todas</option><option>Civil</option><option>Proc. Civil</option><option>Penal</option><option>Proc. Penal</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row" style="margin-top:10px">
+              <div class="form-group" style="margin:0"><label>Relator</label><input id="juris-relator" placeholder="Nome do relator..."/></div>
+              <div class="form-group" style="margin:0"><label>Período</label>
+                <div style="display:flex;gap:8px"><input type="date" id="juris-de"/><input type="date" id="juris-ate"/></div>
+              </div>
+            </div>
+          </div>
+          <div id="juris-results"></div>
+        </div>
+        <div class="tab-content" id="tc-leis">
+          <div class="search-filters">
+            <div class="form-group">
+              <label>Buscar lei ou artigo</label>
+              <div style="display:flex;gap:8px">
+                <input id="lei-q" placeholder="Ex.: CPC art. 523, CC art. 1.694, CF art. 5º, Lei 9.503/97 art. 302..." onkeydown="if(event.key==='Enter')searchLeis()"/>
+                <button class="btn btn-primary" onclick="searchLeis()">⏎ Buscar</button>
+              </div>
+            </div>
+            <p class="muted">Fonte: Planalto.gov.br (links oficiais). Conteúdo abaixo é <strong>EXEMPLO (mock)</strong> — em produção, buscar redação vigente na fonte oficial.</p>
+          </div>
+          <div id="lei-results"></div>
+        </div>
+        <div class="tab-content" id="tc-doutrina">
+          <div class="card" style="text-align:center;padding:40px">
+            <div style="font-size:2rem;margin-bottom:12px">📚</div>
+            <h2>Doutrina — Em breve</h2>
+            <p class="muted" style="margin-top:8px">Módulo de doutrina será disponibilizado em versão futura.<br/>Será possível importar PDFs/HTML e criar recortes doutrinários.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLEÇÕES -->
+      <div id="page-colecoes" class="page" style="display:none">
+        <div class="section-header">
+          <h1>🗂️ Coleções</h1>
+          <button class="btn btn-primary" onclick="openModalColecao()">+ Nova coleção</button>
+        </div>
+        <div id="colecoes-list"></div>
+      </div>
+
+      <!-- MODELOS -->
+      <div id="page-modelos" class="page" style="display:none">
+        <div class="section-header">
+          <h1>📋 Modelos de Peças</h1>
+          <span class="muted">Catálogo Civil/Proc. Civil + Penal/Proc. Penal</span>
+        </div>
+        <div class="tabs">
+          <div class="tab active" id="tab-mod-civil" onclick="setModeloTab('civil')">⚖️ Civil / Proc. Civil</div>
+          <div class="tab" id="tab-mod-penal" onclick="setModeloTab('penal')">🔒 Penal / Proc. Penal</div>
+        </div>
+        <div class="tab-content active" id="tc-mod-civil"></div>
+        <div class="tab-content" id="tc-mod-penal"></div>
+      </div>
+
+      <!-- ADMIN -->
+      <div id="page-admin" class="page" style="display:none">
+        <div class="admin-panel-header">
+          <div class="admin-panel-icon">🛡️</div>
+          <div>
+            <h1 style="margin-bottom:4px">Painel Administrativo</h1>
+            <p class="muted">Controle total do sistema — usuários, permissões, LGPD e segurança.</p>
+          </div>
+          <div style="margin-left:auto"><span class="admin-badge">👑 Administrador</span></div>
+        </div>
+        <div class="tabs">
+          <div class="tab active" id="tab-adm-users" onclick="setAdminTab('users')">👥 Usuários</div>
+          <div class="tab" id="tab-adm-perms" onclick="setAdminTab('perms')">🔐 Permissões</div>
+          <div class="tab" id="tab-adm-lgpd" onclick="setAdminTab('lgpd')">🔒 LGPD</div>
+          <div class="tab" id="tab-adm-seg" onclick="setAdminTab('seg')">🛡️ Segurança</div>
+          <div class="tab" id="tab-adm-sistema" onclick="setAdminTab('sistema')">⚙️ Sistema</div>
+        </div>
+        <div class="tab-content active" id="tc-adm-users">
+          <div class="section-header" style="margin-bottom:16px">
+            <span class="section-title">👥 Usuários cadastrados</span>
+            <button class="btn btn-primary btn-sm" onclick="openModalNovoUsuario()">+ Novo usuário</button>
+          </div>
+          <div id="admin-users-list"></div>
+        </div>
+        <div class="tab-content" id="tc-adm-perms">
+          <h2 style="margin-bottom:16px">🔐 Controle de Permissões por Perfil</h2>
+          <div id="perms-content"></div>
+        </div>
+        <div class="tab-content" id="tc-adm-lgpd">
+          <div class="card"><h2 style="margin-bottom:14px">🔒 Conformidade LGPD</h2><div id="lgpd-checklist"></div></div>
+        </div>
+        <div class="tab-content" id="tc-adm-seg">
+          <div class="card"><h2 style="margin-bottom:14px">🛡️ Checklist de Segurança</h2><div id="seg-checklist"></div></div>
+        </div>
+        <div class="tab-content" id="tc-adm-sistema">
+          <div id="sistema-content"></div>
+        </div>
+      </div>
+
+      <!-- AUDITORIA -->
+      <div id="page-auditoria" class="page" style="display:none">
+        <h1 style="margin-bottom:16px">📊 Trilha de Auditoria</h1>
+        <div class="table-wrap">
+          <table><thead><tr><th>Data/Hora</th><th>Usuário</th><th>Perfil</th><th>Ação</th><th>Entidade</th><th>Detalhe</th></tr></thead>
+          <tbody id="audit-tbody"></tbody></table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-processo">
+  <div class="modal">
+    <div class="modal-header"><h2>📁 Novo Processo</h2><button class="modal-close" onclick="closeModal('modal-processo')">✕</button></div>
+    <div class="form-row">
+      <div class="form-group"><label>Nº do Processo</label><input id="mp-num" placeholder="0000000-00.0000.0.00.0000"/></div>
+      <div class="form-group"><label>Tribunal</label><input id="mp-tribunal" placeholder="Ex.: TJSP"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Cliente</label><input id="mp-cliente" placeholder="Nome do cliente"/></div>
+      <div class="form-group"><label>Área</label>
+        <select id="mp-area"><option>Civil</option><option>Proc. Civil</option><option>Penal</option><option>Proc. Penal</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Vara / Juízo</label><input id="mp-vara" placeholder="Ex.: 3ª Vara Cível"/></div>
+      <div class="form-group"><label>Status</label>
+        <select id="mp-status"><option value="ativo">Ativo</option><option value="arquivado">Arquivado</option><option value="encerrado">Encerrado</option></select>
+      </div>
+    </div>
+    <div class="form-group"><label>Tags (separadas por vírgula)</label><input id="mp-tags" placeholder="Ex.: urgente, tutela, recurso"/></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-processo')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveProcesso()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-colecao">
+  <div class="modal">
+    <div class="modal-header"><h2>🗂️ Nova Coleção</h2><button class="modal-close" onclick="closeModal('modal-colecao')">✕</button></div>
+    <div class="form-group"><label>Nome da coleção</label><input id="mc-nome" placeholder="Ex.: Imissão de Posse — TJSP"/></div>
+    <div class="form-group"><label>Descrição</label><textarea id="mc-desc" placeholder="Tema, finalidade..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-colecao')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveColecao()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-recorte">
+  <div class="modal">
+    <div class="modal-header"><h2>💾 Salvar Recorte</h2><button class="modal-close" onclick="closeModal('modal-recorte')">✕</button></div>
+    <input type="hidden" id="mr-data"/>
+    <div class="form-group"><label>Título do recorte</label><input id="mr-titulo"/></div>
+    <div class="form-group"><label>Trecho selecionado</label><textarea id="mr-trecho" style="min-height:100px"></textarea></div>
+    <div class="form-group"><label>Anotação pessoal</label><textarea id="mr-nota" placeholder="Observações, contexto de uso..."></textarea></div>
+    <div class="form-group"><label>Coleção</label><select id="mr-colecao"></select></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-recorte')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveRecorte()">💾 Salvar recorte</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-ementa">
+  <div class="modal modal-lg">
+    <div class="modal-header"><h2>📋 Ementa Padronizada</h2><button class="modal-close" onclick="closeModal('modal-ementa')">✕</button></div>
+    <div class="form-row">
+      <div class="form-group"><label>Classe</label><input id="em-classe" placeholder="Ex.: Agravo de instrumento"/></div>
+      <div class="form-group"><label>Ação / Tema</label><input id="em-acao" placeholder="Ex.: Ação de imissão na posse"/></div>
+    </div>
+    <div class="form-group"><label>Decisão recorrida (trecho em maiúsculas)</label><textarea id="em-decisao" placeholder="DETERMINA À PARTE AUTORA..."></textarea></div>
+    <div class="form-row-3">
+      <div class="form-group"><label>Nº do processo</label><input id="em-num"/></div>
+      <div class="form-group"><label>Relator</label><input id="em-relator"/></div>
+      <div class="form-group"><label>Data de Julgamento</label><input type="date" id="em-dtjulg"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Órgão Julgador</label><input id="em-orgao" placeholder="Ex.: 9ª Câmara de Direito Privado"/></div>
+      <div class="form-group"><label>Data de Publicação</label><input type="date" id="em-dtpub"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Tribunal / Fonte</label><input id="em-tribunal" placeholder="Ex.: TJSP"/></div>
+      <div class="form-group"><label>Link oficial (obrigatório)</label><input id="em-link" placeholder="https://..."/></div>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="gerarEmenta()" style="margin-bottom:12px">⚙️ Gerar ementa</button>
+    <div class="form-group"><label>Ementa gerada</label><div class="ementa-box" id="em-output">Preencha os campos acima e clique em "Gerar ementa".</div></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="copyEmenta()">📋 Copiar</button>
+      <button class="btn btn-primary" onclick="salvarEmentaComoRecorte()">💾 Salvar como recorte</button>
+      <button class="btn btn-secondary" onclick="closeModal('modal-ementa')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-versoes">
+  <div class="modal">
+    <div class="modal-header"><h2>🕐 Histórico de Versões</h2><button class="modal-close" onclick="closeModal('modal-versoes')">✕</button></div>
+    <div id="versoes-list"></div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('modal-versoes')">Fechar</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-novo-usuario">
+  <div class="modal">
+    <div class="modal-header"><h2>👤 Novo Usuário</h2><button class="modal-close" onclick="closeModal('modal-novo-usuario')">✕</button></div>
+    <div class="form-group"><label>Nome completo</label><input id="nu-nome" placeholder="Ex.: Dr. João Silva"/></div>
+    <div class="form-group"><label>E-mail</label><input id="nu-email" type="email" placeholder="usuario@escritorio.com.br"/></div>
+    <div class="form-group"><label>Senha</label><input id="nu-senha" type="password" placeholder="Mínimo 6 caracteres"/></div>
+    <div class="form-group"><label>Perfil</label>
+      <select id="nu-perfil">
+        <option value="procurador">Procurador</option>
+        <option value="assistente">Assistente</option>
+        <option value="admin">Administrador</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-novo-usuario')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarNovoUsuario()">💾 Criar usuário</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-detail">
+  <div class="modal modal-lg">
+    <div class="modal-header"><h2 id="detail-title">Detalhe</h2><button class="modal-close" onclick="closeModal('modal-detail')">✕</button></div>
+    <div id="detail-body"></div>
+    <div class="modal-footer" id="detail-footer"></div>
+  </div>
+</div>
+
+<script>
+// ===================== CREDENCIAIS =====================
+const USERS_DB = [
+  {email:'admin@juristech.com.br',   senha:'121212', role:'admin',      nome:'Administrador',        ativo:true},
+  {email:'procurador@escritorio.com.br', senha:'123456', role:'procurador', nome:'Dr. Antonio Carlos', ativo:true},
+  {email:'assistente@escritorio.com.br', senha:'123456', role:'assistente', nome:'Assistente Jurídico',  ativo:true},
+];
+
+// ===================== STATE =====================
+let STATE = {
+  user:null, processos:[], documentos:[], snippets:[], colecoes:[],
+  auditLogs:[], editorContent:'', editorTitle:'', editorVersions:[],
+  wizardStep:0, wizardData:{}, searchTab:'juris', modeloTab:'civil', adminTab:'users',
+  usuarios: JSON.parse(JSON.stringify(USERS_DB))
+};
+
+function loadState(){
+  try{const s=localStorage.getItem('jt_state2');if(s){const p=JSON.parse(s);Object.assign(STATE
