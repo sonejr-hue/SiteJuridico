@@ -101,19 +101,19 @@
       display:flex;
       align-items:center;
       justify-content:space-between;
-      min-height:78px;
+      min-height:90px;
       gap:20px;
     }
     .brand{
       display:flex;
       align-items:center;
-      gap:14px;
+      gap:16px;
       min-width:0;
     }
     .brand-mark{
-      width:70px;
-      height:70px;
-      border-radius:14px;
+      width:100px;
+      height:100px;
+      border-radius:16px;
       display:grid;
       place-items:center;
       background:linear-gradient(135deg, rgba(200,169,107,.22), rgba(200,169,107,.08));
@@ -121,6 +121,7 @@
       color:var(--brand-2);
       font-size:22px;
       overflow:hidden;
+      flex-shrink:0;
     }
     .brand-mark img{
       width:100%;
@@ -129,7 +130,7 @@
     }
     .brand-text{min-width:0}
     .brand-name{
-      font-size:17px;
+      font-size:18px;
       font-weight:bold;
       white-space:nowrap;
       overflow:hidden;
@@ -137,8 +138,8 @@
     }
     .brand-sub{
       color:var(--soft);
-      font-size:12px;
-      margin-top:4px;
+      font-size:13px;
+      margin-top:5px;
     }
     .menu{
       display:flex;
@@ -590,7 +591,7 @@
       .menu{
         display:none;
         position:absolute;
-        top:79px;
+        top:91px;
         left:16px;
         right:16px;
         flex-direction:column;
@@ -604,6 +605,13 @@
       .menu.open{display:flex}
       .menu-actions .btn{display:none}
       .mobile-toggle{display:inline-grid;place-items:center}
+      .brand-mark{
+        width:80px;
+        height:80px;
+      }
+      .nav{
+        min-height:85px;
+      }
     }
 
     @media (max-width: 640px){
@@ -623,8 +631,11 @@
       .brand-sub{font-size:11px}
       .hero-card{padding:22px}
       .brand-mark{
-        width:56px;
-        height:56px;
+        width:64px;
+        height:64px;
+      }
+      .nav{
+        min-height:78px;
       }
     }
   </style>
